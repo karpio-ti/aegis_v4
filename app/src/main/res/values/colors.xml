@@ -2,7 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="blue">#0066CC</color> <!-- Azul -->
+    <color name="blue">#0066CC</color>
     <color name="yellow">#FFC107</color>
+    <color name="gray">#D3D3D3</color>
 </resources>
 

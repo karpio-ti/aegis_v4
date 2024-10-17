@@ -3,4 +3,7 @@
     <string name="instructions_text">Para comenzar a utilizar la aplicación se debe seleccionar la opción "BUSCAR PRODUCTO". Automáticamente se habilitará la cámara para escanear el código QR disponible en el producto y desplegará en pantalla la nueva información de la etiqueta.</string>
     <string name="search_button">BUSCAR PRODUCTO</string>
     <string name="app_name">Cambio_precio_gondola</string>
+    <string name="connected_to_bluetooth">Conectado a %1$s</string>
+    <string name="bluetooth_not_connected">Debe conectarse a Bluetooth (%1$s)</string>
+    <string name="bluetooth_permission_denied">Debe conectarse a bluetooth</string>
 </resources>
