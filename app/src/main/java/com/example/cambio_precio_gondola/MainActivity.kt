@@ -25,14 +25,29 @@ import androidx.core.view.WindowInsetsCompat
 class MainActivity : AppCompatActivity() {
 
     private lateinit var bluetoothAdapter: BluetoothAdapter
-    private val deviceName = "WF-1000XM5 de Daniel"  // Nombre del dispositivo Bluetooth
+    private val deviceName = "WF-1000XM5 de Daniel"
     private val requestBluetoothPermissionsCode = 1
 
     private val bluetoothReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val action: String? = intent?.action
-            if (BluetoothDevice.ACTION_BOND_STATE_CHANGED == action) {
-                updateBluetoothStatus() // Actualiza el estado de Bluetooth
+            when (action) {
+                BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
+                    updateBluetoothStatus() // Actualiza el estado cuando hay cambio en el emparejamiento
+                }
+                BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED -> {
+                    val state = intent?.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE, BluetoothAdapter.ERROR)
+                    when (state) {
+                        BluetoothAdapter.STATE_CONNECTED -> {
+                            Log.d("BluetoothConnection", "Bluetooth connected")
+                            updateBluetoothStatus() // Actualiza el estado al conectar
+                        }
+                        BluetoothAdapter.STATE_DISCONNECTED -> {
+                            Log.d("BluetoothConnection", "Bluetooth disconnected")
+                            updateBluetoothStatus() // Actualiza el estado al desconectar
+                        }
+                    }
+                }
             }
         }
     }
@@ -60,7 +75,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        val filter = IntentFilter().apply {
+            addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+            addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED) // Escuchar cambios de conexión de Bluetooth
+        }
         registerReceiver(bluetoothReceiver, filter) // Registrar el receptor
     }
 
@@ -76,18 +94,18 @@ class MainActivity : AppCompatActivity() {
         Log.d("BluetoothConnection", "Checking Bluetooth connection for device: $deviceName")
 
         if (checkBluetoothPermissions() && isBluetoothHeadsetConnected()) {
-            enterButton.isEnabled = true  // Habilitar botón
-            enterButton.setBackgroundTintList(
-                ContextCompat.getColorStateList(this, android.R.color.holo_orange_light)
-            )
+            enterButton.isEnabled = true
+            enterButton.backgroundTintList = ContextCompat.getColorStateList(this, android.R.color.holo_orange_light)
             enterButton.setTextColor(ContextCompat.getColor(this, android.R.color.white))
+            enterButton.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_orange_light))
             statusTextView.text = getString(R.string.connected_to_bluetooth, deviceName)
         } else {
-            enterButton.isEnabled = false  // Deshabilitar botón
+            // Deshabilitar botón y cambiar color a gris
+            enterButton.isEnabled = false
             enterButton.setBackgroundColor(Color.LTGRAY)
             enterButton.setTextColor(Color.GRAY)
             statusTextView.text = getString(R.string.bluetooth_not_connected, deviceName)
-            requestBluetoothPermissions() // Solicitar permisos de Bluetooth
+            requestBluetoothPermissions() // Solicitar permisos de Bluetooth si es necesario
         }
     }
 
