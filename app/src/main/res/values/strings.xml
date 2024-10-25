@@ -6,4 +6,12 @@
     <string name="connected_to_bluetooth">Conectado a %1$s</string>
     <string name="bluetooth_not_connected">Debe conectarse a Bluetooth (%1$s)</string>
     <string name="bluetooth_permission_denied">Debe conectarse a bluetooth</string>
+    <string name="nombre_prod">Nombre Prod.:</string>
+    <string name="item_nbr">Item Nbr:</string>
+    <string name="peso_pieza">Peso/Pieza:</string>
+    <string name="fec_elab">Fec. Elab.:</string>
+    <string name="fec_venc">Fec. Venc.:</string>
+    <string name="precio_ant">Precio Ant.:</string>
+    <string name="precio_act">Precio Act.:</string>
+    <string name="precio_total">Precio Total:</string>
 </resources>
