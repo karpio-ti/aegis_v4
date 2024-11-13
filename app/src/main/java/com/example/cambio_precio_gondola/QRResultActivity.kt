@@ -1,5 +1,5 @@
 package com.example.cambio_precio_gondola
-
+import android.graphics.Matrix;
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -43,13 +43,12 @@ class QRResultActivity : AppCompatActivity() {
 
             // Cambiar el color de las barras a gris
             val paint = Paint().apply {
-                color = Color.rgb(128, 128, 128) // Color gris similar al de la imagen
+                color = Color.rgb(128, 128, 128) // Color gris
                 isAntiAlias = true
             }
 
             // Dibujar el código de barras
             for (x in 0 until width) {
-                // La altura de la barra puede ser mayor o menor según el bitMatrix
                 val barHeight = if (bitMatrix[x, 0]) height.toFloat() else 0f
                 canvas.drawRect(x.toFloat(), (height - barHeight), (x + 1).toFloat(), height.toFloat(), paint)
             }
@@ -57,7 +56,7 @@ class QRResultActivity : AppCompatActivity() {
             // Cambiar el color del texto a gris más claro
             val textPaint = Paint().apply {
                 color = Color.rgb(150, 150, 150) // Gris claro para el texto
-                textSize = 40f // Ajusta el tamaño del texto para hacerlo similar
+                textSize = 40f // Ajusta el tamaño del texto
                 isAntiAlias = true
                 textAlign = Paint.Align.CENTER
             }
@@ -65,13 +64,21 @@ class QRResultActivity : AppCompatActivity() {
             // Dibujar el texto centrado
             canvas.drawText(data, (width / 2).toFloat(), (height + 40).toFloat(), textPaint)
 
-            // Establecer el bitmap en el ImageView
-            imageView.setImageBitmap(bmp)
+            // Rotar la imagen 90 grados
+            val matrix = Matrix()
+            matrix.postRotate(90f, (bmp.width / 2).toFloat(), (bmp.height / 2).toFloat()) // Rota alrededor del centro
+            val rotatedBmp = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
+
+            // Redimensionar el bitmap rotado para que se ajuste al tamaño del ImageView
+            val scaledBmp = Bitmap.createScaledBitmap(rotatedBmp, 2000, 6000, true) // Ajusta el taamaño aquí
+
+            // Establecer el bitmap redimensionado en el ImageView
+            imageView.setImageBitmap(scaledBmp)
+
         } catch (e: WriterException) {
             e.printStackTrace()
         }
     }
-
 
     companion object {
         private const val BLACK = -0x1000000 // Color negro

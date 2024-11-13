@@ -22,12 +22,23 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
+
+
+import android.app.AlertDialog
+import android.text.InputType
+import android.widget.EditText
+import android.widget.Toast
+
 class MainActivity : AppCompatActivity() {
+
+
+
+
 
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private val deviceName = "WF-1000XM5 de Daniel"
     private val requestBluetoothPermissionsCode = 1
-
+    private val numeroIngresado = 0
     private val bluetoothReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val action: String? = intent?.action
@@ -62,16 +73,20 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
+        mostrarPopupNumeros(this)
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter() // Inicializar BluetoothAdapter
         updateBluetoothStatus() // Actualizar estado de Bluetooth
 
         val enterButton: Button = findViewById(R.id.enterButton)
         enterButton.setOnClickListener {
             val intent = Intent(this, InstructionsActivity::class.java)
+            intent.putExtra("numero_ingresado", numeroIngresado) // Enviar el valor a la segunda actividad
             startActivity(intent) // Navegar a InstructionsActivity
         }
     }
+
+
+
 
     override fun onStart() {
         super.onStart()
@@ -93,7 +108,8 @@ class MainActivity : AppCompatActivity() {
         val statusTextView: TextView = findViewById(R.id.statusTextView)
         Log.d("BluetoothConnection", "Checking Bluetooth connection for device: $deviceName")
 
-        if (checkBluetoothPermissions() && isBluetoothHeadsetConnected()) {
+        if (checkBluetoothPermissions()  ){
+           //  && isBluetoothHeadsetConnected()) {
             enterButton.isEnabled = true
             enterButton.backgroundTintList = ContextCompat.getColorStateList(this, android.R.color.holo_orange_light)
             enterButton.setTextColor(ContextCompat.getColor(this, android.R.color.white))
@@ -108,6 +124,11 @@ class MainActivity : AppCompatActivity() {
             requestBluetoothPermissions() // Solicitar permisos de Bluetooth si es necesario
         }
     }
+
+
+
+
+
 
     // Verifica si un auricular Bluetooth está conectado
     @SuppressLint("MissingPermission", "WrongConstant")
@@ -166,4 +187,46 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+
+    fun mostrarPopupNumeros(context: Context) {
+        // Crear un EditText que solo permita números
+        val input = EditText(context).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER // Permite solo números
+        }
+
+        // Crear el AlertDialog
+        val dialog = AlertDialog.Builder(context)
+            .setTitle("Ingrese  número de LOCAL")
+            .setMessage("Solo se Aceptan numeros")
+            .setView(input)
+            .setPositiveButton("Aceptar") { _, _ ->
+                // Obtener el valor ingresado
+                val numeroIngresado = input.text.toString()
+                if (numeroIngresado.isNotEmpty()) {
+                    Toast.makeText(context, "Número ingresado: $numeroIngresado", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "No ingresaste ningún número.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancelar") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+
+        dialog.show()
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
