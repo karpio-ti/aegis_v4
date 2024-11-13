@@ -132,8 +132,6 @@ class InstructionsActivity : AppCompatActivity() {
                         null
                     }
                 }
-                // Dentro de la función que procesa los datos escaneados}
-                //240930114158-210633000154-1-240930-984-154
                 if (dataParts.size >= 6) {
                     // Extraer cada parte del código QR
                     val pluNbr = dataParts[1].substring(1, 6).toInt()
@@ -148,6 +146,7 @@ class InstructionsActivity : AppCompatActivity() {
                     val precioAnt = (dataParts[4].toDoubleOrNull() ?: 5490.0).toInt()  // Convertir precio anterior a entero
                     val precioActual = resultado?.sellPrice // Precio actual fijo convertido a entero
                     val precioTotal = (precioActual?.times(peso))?.toInt()
+
                   //  val precioTotal = (precioActual * peso).toInt()  // Calcular precio total y convertirlo a entero
 
                     // Formatear los precios como $<precio>/Kg y el total como $<precio>
@@ -157,6 +156,7 @@ class InstructionsActivity : AppCompatActivity() {
 
                     // Enviar datos a ProdDetailActivity
                     val intent = Intent(this, ProdDetailActivity::class.java)
+                    intent.putExtra("resolucion",resultado?.resolucion)
                     intent.putExtra("nombre_prod", nombreProd)
                     intent.putExtra("item_nbr", itemNbr)
                     intent.putExtra("peso", "$peso Kg")  // Agregar 'Kg' al final del peso

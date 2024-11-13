@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
@@ -18,9 +19,28 @@ class QRResultActivity : AppCompatActivity() {
         setContentView(R.layout.activity_qr_result)
 
         // Obtener el número de código de barras del intent
+        val resolucion = intent.getStringExtra("resolucion")
+        val resolucionConEspacios = resolucion?.replace("|", " ") ?: "No disponible"
+        val nombreProd = intent.getStringExtra("nombre_prod")
+        val itemNbr = intent.getStringExtra("item_nbr")
+        val peso = intent.getStringExtra("peso")
+        val fecElab = intent.getStringExtra("fec_elab")
+        val fecVenc = intent.getStringExtra("fec_venc")
+        val precioAnt = intent.getStringExtra("precio_ant")
+        val precioActual = intent.getStringExtra("precio_actual")
+        val precioTotal = intent.getStringExtra("precio_total")
         val barcodeNumber = intent.getStringExtra("barcode_number")
 
-        // Generar y mostrar el código de barras
+        // Asignar los datos a los TextViews
+        findViewById<TextView>(R.id.resolucion).text=resolucionConEspacios
+        findViewById<TextView>(R.id.nombreProd).text = nombreProd
+        findViewById<TextView>(R.id.itemNbr).text = itemNbr
+        findViewById<TextView>(R.id.peso).text = peso
+        findViewById<TextView>(R.id.fecElab).text = fecElab
+        findViewById<TextView>(R.id.fecVenc).text = fecVenc
+        findViewById<TextView>(R.id.precioActual).text = precioActual
+        findViewById<TextView>(R.id.precioTotal).text = precioTotal
+
         val barcodeImage = findViewById<ImageView>(R.id.barcode_image)
         if (barcodeNumber != null) {
             generateBarcode(barcodeNumber, barcodeImage)

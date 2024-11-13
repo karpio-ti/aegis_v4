@@ -24,6 +24,7 @@ class ProdDetailActivity : AppCompatActivity() {
         val precioAnt = intent.getStringExtra("precio_ant") ?: "0.0"
         val precioActual = intent.getStringExtra("precio_actual") ?: "0.0"
         val precioTotal = intent.getStringExtra("precio_total") ?: "0.0"
+        var resolucion=intent.getStringExtra("resolucion")?:"N/A"
 
         // Asignar los datos a los TextViews (asegúrate de tener TextViews correspondientes en tu layout)
         findViewById<TextView>(R.id.text_view_nombre_prod).text = nombreProd
@@ -35,14 +36,27 @@ class ProdDetailActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.text_view_precio_act).text = precioActual
         findViewById<TextView>(R.id.text_view_precio_total).text = precioTotal
 
+
         // Botón para pre-visualizar la etiqueta
         val buttonPreview = findViewById<Button>(R.id.button_preview_label)
 
         // Asignar funcionalidad al botón
         buttonPreview.setOnClickListener {
-            // Crear un intent para enviar el número de código de barras a la siguiente actividad
+            // Crear un intent para enviar los datos a QRResultActivity
             val intent = Intent(this, QRResultActivity::class.java)
-            intent.putExtra("barcode_number", barcodeNumber) // Pasar la variable al intent
+
+            // Pasar los datos de la actividad actual al intent
+            intent.putExtra("nombre_prod", nombreProd)
+            intent.putExtra("item_nbr", itemNbr)
+            intent.putExtra("peso", peso)
+            intent.putExtra("fec_elab", fecElab)
+            intent.putExtra("fec_venc", fecVenc)
+            intent.putExtra("precio_ant", precioAnt)
+            intent.putExtra("precio_actual", precioActual)
+            intent.putExtra("precio_total", precioTotal)
+            intent.putExtra("barcode_number", barcodeNumber) // También puedes pasar el número de código de barras si es necesario
+            intent.putExtra("resolucion",resolucion)
+            // Iniciar QRResultActivity
             startActivity(intent)
         }
     }
