@@ -10,8 +10,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-feature android:name="android.hardware.bluetooth" android:required="true" />
-    <application
 
+    <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -22,8 +22,22 @@
         android:theme="@style/Theme.Cambio_precio_gondola"
         tools:targetApi="31">
 
+        <!-- Main Activity without intent-filter -->
         <activity
             android:name=".MainActivity"
+            android:exported="true" />
+
+        <!-- Instructions Activity -->
+        <activity
+            android:name=".InstructionsActivity"
+            android:screenOrientation="portrait"
+            android:exported="true" />
+
+        <activity android:name=".InstructionsActivity$QrCodeScannerActivity" />
+
+        <!-- ProdDetailActivity set as main entry point -->
+        <activity
+            android:name=".ProdDetailActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,22 +45,8 @@
             </intent-filter>
         </activity>
 
-
         <activity
-            android:name=".InstructionsActivity"
-            android:screenOrientation="portrait"
-            android:exported="true">
-
-        </activity>
-
-        <activity android:name=".InstructionsActivity$QrCodeScannerActivity" />
-
-        <activity android:name=".ProdDetailActivity"
-
-            android:exported="true" />
-        <activity android:name=".QRResultActivity"
-
+            android:name=".QRResultActivity"
             android:exported="true" />
     </application>
-
 </manifest>
