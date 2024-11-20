@@ -42,7 +42,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(files("../ZSDK_ANDROID_API.jar"))
+
     implementation(libs.androidx.navigation.ui.ktx)
     //implementation(files("..\\gson-2.10.1-javadoc.jar"))
     testImplementation(libs.junit)
@@ -52,4 +52,9 @@ dependencies {
     implementation (libs.core)
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     //implementation("com.google.code.gson:gson:2.11.0")
+
+}
+
+dependencies {
+    implementation(files("libs/ZSDK_ANDROID_API.jar"))
 }
