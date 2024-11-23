@@ -79,9 +79,17 @@ class MainActivity : AppCompatActivity() {
 
         val enterButton: Button = findViewById(R.id.enterButton)
         enterButton.setOnClickListener {
+            val numeroIngresado = findViewById<TextView>(R.id.localNumberTextView).text.toString().removePrefix("Local: ").trim()
+            val numero = numeroIngresado.toIntOrNull() // Convertir el número a Int
             val intent = Intent(this, InstructionsActivity::class.java)
-            intent.putExtra("numero_ingresado", numeroIngresado) // Enviar el valor a la segunda actividad
+            intent.putExtra("numero_ingresado", numero) // Enviar el valor a la segunda actividad
             startActivity(intent) // Navegar a InstructionsActivity
+        }
+
+        // Botón para ingresar el número de local
+        val localButton: Button = findViewById(R.id.localButton)
+        localButton.setOnClickListener {
+            mostrarPopupNumeros(this)
         }
     }
 
@@ -190,9 +198,27 @@ class MainActivity : AppCompatActivity() {
 
 
     fun mostrarPopupNumeros(context: Context) {
+        fun mostrarConfirmacion(numeroIngresado: String) {
+            val localNumberTextView: TextView = findViewById(R.id.localNumberTextView)
+
+            AlertDialog.Builder(this)
+                .setTitle("Confirmar número de local")
+                .setMessage("¿El número de local ingresado es $numeroIngresado?")
+                .setPositiveButton("Sí") { _, _ ->
+                    localNumberTextView.text = "Local: $numeroIngresado"
+                    Toast.makeText(this, "Número confirmado: $numeroIngresado", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("No") { _, _ ->
+                    mostrarPopupNumeros(this) // Volver a mostrar el cuadro de entrada
+                }
+                .create()
+                .show()
+        }
+
         // Crear un EditText que solo permita números
         val input = EditText(context).apply {
             inputType = InputType.TYPE_CLASS_NUMBER // Permite solo números
+            filters = arrayOf(android.text.InputFilter.LengthFilter(3)) // Limitar a 3 dígitos
         }
 
         // Crear el AlertDialog
@@ -203,30 +229,20 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton("Aceptar") { _, _ ->
                 // Obtener el valor ingresado
                 val numeroIngresado = input.text.toString()
-                if (numeroIngresado.isNotEmpty()) {
-                    Toast.makeText(context, "Número ingresado: $numeroIngresado", Toast.LENGTH_SHORT).show()
+                if (numeroIngresado.isNotEmpty() && numeroIngresado.toIntOrNull() != null) {
+                    mostrarConfirmacion(numeroIngresado) // Mostrar cuadro de confirmación
+                    //Toast.makeText(context, "Número ingresado: $numeroIngresado", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(context, "No ingresaste ningún número.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Por favor, ingrese un número válido", Toast.LENGTH_SHORT).show()
+                    mostrarPopupNumeros(context) // Volver a mostrar el cuadro de entrada
                 }
             }
-            .setNegativeButton("Cancelar") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .create()
+          //  .setNegativeButton("Cancelar")
+           // { dialog, _ ->
+        //dialog.dismiss()
+            //}
+           .create()
 
-        dialog.show()
+       dialog.show()
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
+    }

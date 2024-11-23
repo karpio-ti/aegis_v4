@@ -21,7 +21,11 @@ class InstructionsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_instructions)
-        val numeroIngresado = intent.getStringExtra("numero_ingresado")
+        val numeroIngresado = intent.getIntExtra("numero_ingresado", -1)
+
+        // Mostrar el número de local en el TextView
+        val localNumberTextView: TextView = findViewById(R.id.localNumberTextView)
+        localNumberTextView.text = "Local: $numeroIngresado"  // Mostrar "Local: numero"
         val buscarProducto: Button = findViewById(R.id.buscarProducto)
         buscarProducto.setOnClickListener {
             val integrator = IntentIntegrator(this)

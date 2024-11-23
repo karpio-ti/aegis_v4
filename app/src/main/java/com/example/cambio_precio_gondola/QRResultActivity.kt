@@ -16,7 +16,6 @@ import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
 import com.zebra.sdk.comm.BluetoothConnection
 import com.zebra.sdk.comm.ConnectionException
-import java.io.ByteArrayOutputStream
 
 class QRResultActivity : AppCompatActivity() {
 
@@ -96,7 +95,7 @@ class QRResultActivity : AppCompatActivity() {
         }
     }
 
-    private fun printLabel(barcodeNumber: Number, peso: String, precioActual: String, nombreProd: String, fecElab: String, fecVenc: String, precioTotal: String) {
+    private fun printLabel(barcodeNumber: String, peso: String, precioActual: String, nombreProd: String, fecElab: String, fecVenc: String, precioTotal: String) {
         val connection = BluetoothConnection("AC:3F:A4:B8:DE:A1") // Cambia esta dirección MAC por la correcta
         try {
             connection.open()
