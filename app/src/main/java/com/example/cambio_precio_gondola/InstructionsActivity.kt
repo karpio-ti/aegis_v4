@@ -63,7 +63,6 @@ class InstructionsActivity : AppCompatActivity() {
                     val resolucion: String?,
                     val diasPerecibilidad: Int?
                 )
-
                 // Función para leer el JSON desde los assets
                 fun leerJsonDesdeAssets(context: Context, archivo: String): String {
                     val inputStream = context.assets.open(archivo)

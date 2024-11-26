@@ -223,26 +223,30 @@ class MainActivity : AppCompatActivity() {
 
         // Crear el AlertDialog
         val dialog = AlertDialog.Builder(context)
-            .setTitle("Ingrese  número de LOCAL")
-            .setMessage("Solo se Aceptan numeros")
+            .setTitle("Ingrese número de LOCAL")
+
             .setView(input)
             .setPositiveButton("Aceptar") { _, _ ->
                 // Obtener el valor ingresado
                 val numeroIngresado = input.text.toString()
-                if (numeroIngresado.isNotEmpty() && numeroIngresado.toIntOrNull() != null) {
+
+                // Validar si el campo está vacío, comienza con 0, o no es un número válido
+                if (numeroIngresado.isNotEmpty() && numeroIngresado.toIntOrNull() != null && !numeroIngresado.startsWith("0")) {
                     mostrarConfirmacion(numeroIngresado) // Mostrar cuadro de confirmación
-                    //Toast.makeText(context, "Número ingresado: $numeroIngresado", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(context, "Por favor, ingrese un número válido", Toast.LENGTH_SHORT).show()
+                    // Si el número no es válido o comienza con 0, mostrar mensaje de error
+                    val errorMessage = when {
+                        numeroIngresado.isEmpty() -> "Por favor, ingrese un número."
+                        numeroIngresado.startsWith("0") -> "El número no puede comenzar con 0."
+                        else -> "Por favor, ingrese un número válido."
+                    }
+                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                     mostrarPopupNumeros(context) // Volver a mostrar el cuadro de entrada
                 }
             }
-          //  .setNegativeButton("Cancelar")
-           // { dialog, _ ->
-        //dialog.dismiss()
-            //}
-           .create()
+            .setCancelable(false) // Evita que el usuario cierre el cuadro de diálogo tocando fuera de él
+            .create()
 
-       dialog.show()
+        dialog.show()
     }
     }
