@@ -30,80 +30,67 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/layoutEtiquetaFinal"
         android:layout_width="match_parent"
-        android:layout_height="535dp"
+        android:layout_height="414dp"
         android:orientation="horizontal">
 
         <LinearLayout
-            android:layout_width="321dp"
-            android:layout_height="match_parent"
+            android:layout_width="293dp"
+            android:layout_height="370dp"
+            android:layout_marginTop="10dp"
             android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="27dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/itemNbr"
-                    android:layout_width="246dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:text="03013"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#000000"/>
-
-                <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="93dp"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="top|end"
-                    android:layout_weight="0"
-                    app:srcCompat="@drawable/banner_lider" />
-
-            </LinearLayout>
 
             <TextView
                 android:id="@+id/nombreProd"
                 android:layout_width="match_parent"
-                android:layout_height="41dp"
+                android:layout_height="wrap_content"
                 android:gravity="center|center_vertical"
+                android:text="V HUACHALOMO"
                 android:textColor="#000000"
-                android:textSize="20sp" />
+                android:textSize="20dp" />
+
+            <TextView
+                android:id="@+id/brandName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="TextView"
+                android:textColor="#070101"
+                android:textSize="16dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="466dp"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp">
 
                 <TextView
                     android:id="@+id/resolucion"
-                    android:layout_width="280dp"
+                    android:layout_width="266dp"
                     android:layout_height="wrap_content"
+                    android:text="RAZON SOCIAL"
                     android:textColor="#000000"
-                    />
+                    android:textSize="14sp" />
 
                 <TextView
-                    android:id="@+id/direccion"
-                    android:layout_width="280dp"
+                    android:id="@+id/fecImpresion"
+                    android:layout_width="256dp"
                     android:layout_height="wrap_content"
                     android:textColor="#000000"
-                    />
+                    android:textSize="14dp" />
 
                 <LinearLayout
-                    android:layout_width="281dp"
+                    android:layout_width="276dp"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
                     <TableLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="257dp"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="0dp"
                         android:layout_marginTop="0dp"
-
 
                         android:stretchColumns="1">
 
@@ -112,7 +99,7 @@
 
                             <LinearLayout
                                 android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="match_parent"
                                 android:layout_weight="1"
                                 android:background="@drawable/border_background"
                                 android:orientation="vertical"
@@ -124,14 +111,13 @@
                                     android:gravity="center"
                                     android:text="Fecha ELAB/ENV"
                                     android:textColor="#000000"
-                                    android:textSize="12sp" />
+                                    android:textSize="13sp" />
 
                                 <TextView
                                     android:id="@+id/fecElab"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:gravity="center"
-                                    android:text="22/08/19"
                                     android:textColor="#000000"
                                     android:textSize="14sp" />
 
@@ -139,7 +125,7 @@
 
                             <LinearLayout
                                 android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="match_parent"
                                 android:layout_weight="1"
                                 android:background="@drawable/border_background"
                                 android:orientation="vertical"
@@ -151,14 +137,13 @@
                                     android:gravity="center"
                                     android:text="Fecha Venc."
                                     android:textColor="#000000"
-                                    android:textSize="12sp" />
+                                    android:textSize="13sp" />
 
                                 <TextView
                                     android:id="@+id/fecVenc"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:gravity="center"
-                                    android:text="25/08/19"
                                     android:textColor="#000000"
                                     android:textSize="14sp" />
 
@@ -170,7 +155,7 @@
 
                             <LinearLayout
                                 android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="match_parent"
                                 android:layout_weight="1"
                                 android:background="@drawable/border_background"
                                 android:orientation="vertical"
@@ -182,14 +167,13 @@
                                     android:gravity="center"
                                     android:text="Peso/Pieza"
                                     android:textColor="#000000"
-                                    android:textSize="12sp" />
+                                    android:textSize="13sp" />
 
                                 <TextView
                                     android:id="@+id/peso"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:gravity="center"
-                                    android:text="5.490 /Kg."
                                     android:textColor="#000000"
                                     android:textSize="14sp" />
 
@@ -197,7 +181,7 @@
 
                             <LinearLayout
                                 android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                                android:layout_height="match_parent"
                                 android:layout_weight="1"
                                 android:background="@drawable/border_background"
                                 android:orientation="vertical"
@@ -209,14 +193,13 @@
                                     android:gravity="center"
                                     android:text="Precio(Kg)/UND"
                                     android:textColor="#000000"
-                                    android:textSize="12sp" />
+                                    android:textSize="13sp" />
 
                                 <TextView
                                     android:id="@+id/precioActual"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:gravity="center"
-                                    android:text="1.206 Kg."
                                     android:textColor="#000000"
                                     android:textSize="14sp" />
 
@@ -229,7 +212,7 @@
                             android:layout_height="wrap_content">
 
                             <LinearLayout
-                                android:layout_width="match_parent"
+                                android:layout_width="299dp"
                                 android:layout_height="match_parent"
                                 android:layout_weight="1"
                                 android:background="@drawable/border_background"
@@ -245,7 +228,7 @@
                                     android:gravity="center"
                                     android:text="PRECIO TOTAL"
                                     android:textColor="#000000"
-                                    android:textSize="11sp"
+                                    android:textSize="13sp"
                                     android:textStyle="bold" />
 
                                 <TextView
@@ -253,7 +236,6 @@
                                     android:layout_width="172dp"
                                     android:layout_height="wrap_content"
                                     android:gravity="center"
-                                    android:text="$6.621"
                                     android:textColor="#000000"
                                     android:textSize="24sp"
                                     android:textStyle="bold" />
@@ -263,17 +245,20 @@
                     </TableLayout>
 
                 </LinearLayout>
+
             </LinearLayout>
 
         </LinearLayout>
 
         <ImageView
             android:id="@+id/barcode_image"
-            android:layout_width="78dp"
-            android:layout_height="360dp"
+            android:layout_width="85dp"
+            android:layout_height="338dp"
             android:layout_marginTop="0dp"
             android:layout_marginEnd="0dp"
-            android:layout_marginBottom="0dp" />
+            android:layout_marginBottom="0dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitXY" />
     </LinearLayout>
 
     <Button
@@ -285,7 +270,8 @@
         android:backgroundTint="#FF762F"
         android:drawableLeft="@drawable/print_icon_resized"
         android:text="Imprimir etiqueta"
-        android:textSize="15sp"
         android:textColor="#FFFFFF"
+        android:textSize="15sp"
         android:textStyle="bold" />
+
 </LinearLayout>

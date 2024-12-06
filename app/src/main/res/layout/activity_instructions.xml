@@ -10,33 +10,44 @@
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:background="#015ACF"
-        android:gravity="center"
-        android:orientation="vertical"> <!-- Asegura que el contenido esté centrado dentro del LinearLayout -->
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical">
 
-        <!-- Mueve el TextView aquí para que esté dentro del LinearLayout -->
         <TextView
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:text="Cambio de precio en góndola"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:autoSizeTextType="uniform" />
+            android:layout_gravity="center" />
 
-
-        <TextView
-            android:id="@+id/localNumberTextView"
-            android:layout_width="wrap_content"
+        <!-- Layout para separar Local y Tiempo -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Local: ---"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/localNumberTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Local: ---"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/text_time_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tiempo: -- min"
+                android:textSize="14sp"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
     </LinearLayout>
 
     <TextView
@@ -95,4 +106,16 @@
         android:text="BUSCAR PRODUCTO"
         android:textColor="@android:color/white" />
 
+
+    <Button
+        android:id="@+id/actualizarDataButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Actualizar Data"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@android:color/holo_orange_light"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp" />
 </RelativeLayout>

@@ -8,11 +8,26 @@ import androidx.appcompat.app.AppCompatActivity
 
 class ProdDetailActivity : AppCompatActivity() {
     // Declarar la variable del código de barras
-    private var barcodeNumber: String = "210631006621" // Puedes recibir este valor dinámicamente
+    private var barcodeNumber: String = "210633000988" // Puedes recibir este valor dinámicamente
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_prod_detail)
+
+
+
+        val button2: Button = findViewById(R.id.button2)
+        button2.setOnClickListener {
+            val intent = Intent(this, InstructionsActivity::class.java)
+            intent.putExtra("INICIAR_ESCANER", true) // Pasar extra para iniciar el escáner automáticamente
+            startActivity(intent)
+        }
+
+
+
+
+
+
 
         // Recibir datos del intent
         val intent = intent
@@ -25,7 +40,8 @@ class ProdDetailActivity : AppCompatActivity() {
         val precioActual = intent.getStringExtra("precio_actual") ?: "0.0"
         val precioTotal = intent.getStringExtra("precio_total") ?: "0.0"
         var resolucion=intent.getStringExtra("resolucion")?:"N/A"
-
+        val precioTotalNumero = intent.getIntExtra("precio_total_numero", 555)
+        val brandName = intent.getStringExtra("brand_name") ?: "N/A"
         // Asignar los datos a los TextViews (asegúrate de tener TextViews correspondientes en tu layout)
         findViewById<TextView>(R.id.text_view_nombre_prod).text = nombreProd
         findViewById<TextView>(R.id.text_view_item_nbr).text = itemNbr
@@ -56,6 +72,12 @@ class ProdDetailActivity : AppCompatActivity() {
             intent.putExtra("precio_total", precioTotal)
             intent.putExtra("barcode_number", barcodeNumber) // También puedes pasar el número de código de barras si es necesario
             intent.putExtra("resolucion",resolucion)
+            intent.putExtra("precio_total_numero",precioTotalNumero)
+            intent.putExtra("brand_name", brandName)
+
+
+
+
             // Iniciar QRResultActivity
             startActivity(intent)
         }
