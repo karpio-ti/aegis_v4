@@ -75,15 +75,8 @@ class InstructionsActivity : AppCompatActivity() {
         actualizarDataButton.setOnClickListener {
 
             fetchTokensAndData(
-                numeroIngresado,
-                onSuccess = {
-                    // Aquí colocas la lógica a seguir cuando se obtienen los datos correctamente
-                    Log.d("InstructionsActivity", "Datos descargados correctamente")
-                },
-                onError = { error ->
-                    // Aquí colocas la lógica en caso de que haya un error
-                    Log.e("InstructionsActivity", "Error: $error")
-                }
+                numeroIngresado
+
             )
         }
 
@@ -277,8 +270,8 @@ class InstructionsActivity : AppCompatActivity() {
     //funcion para actualizatr
     fun fetchTokensAndData(
         numeroIngresado: Int,
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit
+        //onSuccess: () -> Unit,
+        //onError: (String) -> Unit
     ) {
         // Mostrar el popup de progreso
         val progressDialog = ProgressDialog(this@InstructionsActivity)
@@ -391,7 +384,7 @@ class InstructionsActivity : AppCompatActivity() {
                     Handler(Looper.getMainLooper()).post {
                         progressDialog.dismiss() // Ocultar el ProgressDialog
                         // Habilitar el botón después de la obtención de datos
-                        onSuccess() // Llamada a la función de éxito
+                        //onSuccess() // Llamada a la función de éxito
                     }
                 }
             } catch (e: InterruptedException) {
@@ -431,15 +424,10 @@ class InstructionsActivity : AppCompatActivity() {
 // Llamada  a la función con número ingresado
                     val numeroIngresado = intent.getIntExtra("numero_ingresado", -1)
                     fetchTokensAndData(
-                        numeroIngresado,
-                        onSuccess = {
-                            // Aquí colocas la lógica a seguir cuando se obtienen los datos correctamente
-                            Log.d("InstructionsActivity", "Datos descargados correctamente")
-                        },
-                        onError = { error ->
-                            // Aquí colocas la lógica en caso de que haya un error
-                            Log.e("InstructionsActivity", "Error: $error")
-                        }
+                        numeroIngresado
+
+
+
                     )
                 }
 

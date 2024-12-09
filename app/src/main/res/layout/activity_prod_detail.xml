@@ -31,11 +31,10 @@
 
     <LinearLayout
         android:id="@+id/linearLayout5"
-        android:layout_width="390dp"
-        android:layout_height="669dp"
+        android:layout_width="368dp"
+        android:layout_height="541dp"
         android:orientation="vertical"
         android:padding="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout"
@@ -246,8 +245,6 @@
             android:layout_width="320dp"
             android:layout_height="54dp"
             android:layout_marginStart="14dp"
-            android:layout_marginTop="150dp"
-            android:layout_marginEnd="14dp"
             android:backgroundTint="#FF762F"
             android:drawableLeft="@drawable/barcode_icon_resized"
             android:gravity="center"

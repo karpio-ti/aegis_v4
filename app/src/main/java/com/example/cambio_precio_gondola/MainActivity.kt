@@ -42,41 +42,252 @@ import java.util.concurrent.TimeUnit
 //mira linea 498
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var enterButton: Button
-    private var habilitar=2
-    //borrar estas funciones despues son solo de prueba para la copia al no tener la red
+    object BluetoothManager {
+        var macAddress: String? = null
+    }
+    private val numeroIngresado = 0
 
+    private lateinit var bluetoothAdapter: BluetoothAdapter
 
-    fun copyAssetToFilesDir(context: Context, assetFileName: String) {
-        try {
-            // Abrir el archivo en assets
-            val inputStream = context.assets.open(assetFileName)
-            val outputFile = File(context.filesDir, assetFileName)
+    private val requestBluetoothPermissionsCode = 1
+    private lateinit var printerMacAddress: String // Variable para guardar la dirección MAC de la impresora
 
-            // Crear el archivo de salida en filesDir
-            FileOutputStream(outputFile).use { outputStream ->
-                val buffer = ByteArray(1024)
-                var length: Int
+    private val bluetoothReceiver = object : BroadcastReceiver() {
+        @SuppressLint("MissingPermission")
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val action: String? = intent?.action
+            when (action) {
+                BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
+                    val device = intent?.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                    if (device != null && isPrinterDevice(device)) {
+                        Log.d("BluetoothConnection", "Bond state changed for printer: ${device.name}")
+                        updateBluetoothStatus() // Actualiza el estado cuando la impresora se desvincula o vincula
+                    }
+                }
 
-                // Leer y escribir en bloques de 1024 bytes
-                while (inputStream.read(buffer).also { length = it } > 0) {
-                    outputStream.write(buffer, 0, length)
+                BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED -> {
+                    val state = intent?.getIntExtra(
+                        BluetoothAdapter.EXTRA_CONNECTION_STATE,
+                        BluetoothAdapter.ERROR
+                    )
+                    when (state) {
+                        BluetoothAdapter.STATE_CONNECTED -> {
+                            Log.d("BluetoothConnection", "Bluetooth connected")
+                            updateBluetoothStatus() // Actualiza el estado al conectar
+                        }
+
+                        BluetoothAdapter.STATE_DISCONNECTED -> {
+                            Log.d("BluetoothConnection", "Bluetooth disconnected")
+                            updateBluetoothStatus() // Actualiza el estado al desconectar
+                        }
+                    }
+                }
+
+                BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+                    // Aquí manejamos cuando se desconecta un dispositivo Bluetooth (como la impresora)
+                    val device = intent?.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+                    if (device != null && isPrinterDevice(device)) {
+                        Log.d("BluetoothConnection", "Printer disconnected: ${device.name}")
+                        updateBluetoothStatus() // Actualiza el estado de Bluetooth cuando se desconecta
+                    }
                 }
             }
+        }
+    }
 
-            inputStream.close()
-            println("Archivo copiado exitosamente a: ${outputFile.absolutePath}")
-        } catch (e: IOException) {
-            e.printStackTrace()
-            println("Error al copiar el archivo: ${e.message}")
+    private val bluetoothStatusHandler = Handler(Looper.getMainLooper())
+    private val bluetoothStatusRunnable = object : Runnable {
+        override fun run() {
+            updateBluetoothStatus()  // Llama a la función que verifica el estado
+            bluetoothStatusHandler.postDelayed(this, 10000)  // Repite cada 10 segundos
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        enterButton = findViewById(R.id.enterButton) // Ahora es accesible en cualquier parte de la actividad
+
+        // Configuración de padding con los insets del sistema
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+        mostrarPopupNumeros(this)
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter() // Inicializar BluetoothAdapter
+        updateBluetoothStatus() // Actualizar estado de Bluetooth
+
+        bluetoothStatusHandler.post(bluetoothStatusRunnable)
+        val enterButton: Button = findViewById(R.id.enterButton)
+        enterButton.setOnClickListener {
+            val numeroIngresado = findViewById<TextView>(R.id.localNumberTextView).text.toString()
+                .removePrefix("Local: ").trim()
+            val numero = numeroIngresado.toIntOrNull() // Convertir el número a Int
+            val intent = Intent(this, InstructionsActivity::class.java)
+            intent.putExtra("numero_ingresado", numero) // Enviar el valor a la segunda actividad
+            startActivity(intent) // Navegar a InstructionsActivity
+        }
+
+        // Botón para ingresar el número de local
+        val localButton: Button = findViewById(R.id.localButton)
+        localButton.setOnClickListener {
+            mostrarPopupNumeros(this)
         }
     }
 
 
-    // fun funcion de copia para ser borrada
-    // Función que habilita o deshabilita el botón dependiendo del parámetro
+    override fun onStart() {
+        super.onStart()
+        val filter = IntentFilter().apply {
+            addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+            addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED) // Escuchar cambios de conexión de Bluetooth
+        }
+        registerReceiver(bluetoothReceiver, filter) // Registrar el receptor
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unregisterReceiver(bluetoothReceiver) // Desregistrar el receptor
+    }
 
 
+    // Actualiza el estado de Bluetooth
+
+    @SuppressLint("MissingPermission")
+    private fun updateBluetoothStatus() {
+        val statusTextView: TextView = findViewById(R.id.statusTextView)
+        Log.d("BluetoothConnection", "Checking Bluetooth connection for device: $")
+
+        if (checkBluetoothPermissions()) {
+            val bondedDevices = bluetoothAdapter.bondedDevices
+            var printerFound = false
+
+            // Log de todos los dispositivos emparejados
+            if (bondedDevices.isNotEmpty()) {
+                Log.d("BluetoothConnection", "Bonded devices list:")
+                for (device in bondedDevices) {
+                    Log.d("BluetoothConnection", "Device Name: ${device.name}, MAC Address: ${device.address}")
+                    val deviceClass = device.bluetoothClass
+                    Log.d("BluetoothConnection", "Device Class: ${deviceClass.deviceClass}")
+                    Log.d("BluetoothConnection", "Major Class: ${deviceClass.majorDeviceClass}")
+                    Log.d("BluetoothConnection", "Minor Class: ${deviceClass.deviceClass}")
+
+                    // Imprime el tipo de dispositivo (por ejemplo, impresora)
+                    Log.d("BluetoothConnection", "Device Type Name: ${getDeviceTypeName(deviceClass.deviceClass)}")
+
+                    // Verifica si el dispositivo es una impresora (clase menor 1664)
+                    if (isPrinterDevice(device)) {
+                        printerFound = true
+                        printerMacAddress = device.address // Guarda la dirección MAC de la impresora
+                        BluetoothManager.macAddress = printerMacAddress
+                        Log.d("BluetoothConnection", "Printer found, MAC address: $printerMacAddress")
+                        break
+                    }
+                }
+            } else {
+                Log.d("BluetoothConnection", "No bonded devices found.")
+            }
+
+            if (printerFound) {
+                actualizarBoton(true) // Activa el botón si se encuentra la impresora
+                statusTextView.text = getString(R.string.connected_to_bluetooth)
+                Log.d("BluetoothConnection", "Printer connected, MAC address: $printerMacAddress")
+            } else {
+                actualizarBoton(false) // Desactiva el botón si no se encuentra la impresora
+                statusTextView.text = getString(R.string.bluetooth_not_connected)
+            }
+        } else {
+            actualizarBoton(false)
+            statusTextView.text = getString(R.string.bluetooth_permission_denied)
+            requestBluetoothPermissions()
+        }
+    }
+
+    // Función para determinar si el dispositivo es una impresora (basado en su clase menor)
+    @SuppressLint("MissingPermission")
+    private fun isPrinterDevice(device: BluetoothDevice): Boolean {
+        val deviceClass = device.bluetoothClass
+        return deviceClass.deviceClass == 1664 // 1664 corresponde a impresoras
+    }
+
+    // Función para obtener el nombre del tipo de dispositivo (basado en su clase)
+    private fun getDeviceTypeName(deviceClass: Int): String {
+        return when (deviceClass) {
+            1536 -> "Imaging Device (general)"
+            1664 -> "Printer"
+            else -> "Unknown Device"
+        }
+    }
+
+
+    // Verifica si un auricular Bluetooth está conectado
+    @SuppressLint("MissingPermission", "WrongConstant")
+    private fun isBluetoothHeadsetConnected(): Boolean {
+        val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        return (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled
+                && mBluetoothAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET) == BluetoothHeadset.STATE_CONNECTED)
+    }
+
+    // Verifica si el dispositivo Bluetooth tiene los permisos adecuados
+    private fun checkBluetoothPermissions(): Boolean {
+        val isBluetoothConnectGranted = ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.BLUETOOTH_CONNECT
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val isBluetoothScanGranted = ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.BLUETOOTH_SCAN
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val isLocationGranted = ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        return isBluetoothConnectGranted && isBluetoothScanGranted && isLocationGranted
+    }
+
+
+    // Solicita los permisos de Bluetooth necesarios
+    private fun requestBluetoothPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ),
+                requestBluetoothPermissionsCode
+            )
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.BLUETOOTH, Manifest.permission.ACCESS_FINE_LOCATION),
+                requestBluetoothPermissionsCode
+            )
+        }
+    }
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == requestBluetoothPermissionsCode) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                updateBluetoothStatus() // Permisos otorgados, actualizar estado
+            } else {
+                val statusTextView: TextView = findViewById(R.id.statusTextView)
+                statusTextView.text =
+                    getString(R.string.bluetooth_permission_denied) // Permisos denegados
+            }
+        }
+    }
 
     fun actualizarBoton(habilitar: Boolean) {
         // Realiza la actualización en el hilo principal
@@ -93,16 +304,22 @@ class MainActivity : AppCompatActivity() {
                     )
                 )
             } else {
-                enterButton.isEnabled = false
+                enterButton.isEnabled = true
                 enterButton.setBackgroundColor(Color.LTGRAY)
                 enterButton.setTextColor(Color.GRAY)
             }
 
             // Forzar la actualización de la vista
-            enterButton.invalidate() // Redibuja la vista
-            enterButton.requestLayout() // Realiza el layout del botón
+            enterButton.invalidate()  // Redibuja la vista
+            enterButton.requestLayout()  // Realiza el layout del botón
         }
     }
+
+
+//FUNCIONES PARA VALIDAR EL LOCAL Y CARGA DE JSON
+
+
+
     //fin borrado
 
     class TokenManager {
@@ -112,10 +329,6 @@ class MainActivity : AppCompatActivity() {
             fun onSuccess(token: String)
             fun onError(error: String)
         }
-
-
-
-
 
 
         // Método para obtener el token asincrónicamente
@@ -133,8 +346,8 @@ class MainActivity : AppCompatActivity() {
                     connection.requestMethod = "POST"
                     connection.setRequestProperty("Content-Type", "application/json")
                     connection.doOutput = true
-                    connection.connectTimeout = 5000 // Tiempo de espera para conectar (5 segundos)
-                    connection.readTimeout = 5000 // Tiempo de espera para leer la respuesta (5 segundos)
+                    connection.connectTimeout = 10000  // Tiempo de espera para conectar (5 segundos)
+                    connection.readTimeout = 10000    // Tiempo de espera para leer la respuesta (5 segundos)
 
                     // Crear el cuerpo de la solicitud
                     val requestBody = JSONObject().apply {
@@ -179,175 +392,41 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private lateinit var bluetoothAdapter: BluetoothAdapter
-    private val deviceName = "WF-1000XM5 de Daniel"
-    private val requestBluetoothPermissionsCode = 1
-    private val numeroIngresado = 0
-    private val bluetoothReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val action: String? = intent?.action
-            when (action) {
-                BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
-                    updateBluetoothStatus() // Actualiza el estado cuando hay cambio en el emparejamiento
-                }
 
-                BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED -> {
-                    val state = intent?.getIntExtra(
-                        BluetoothAdapter.EXTRA_CONNECTION_STATE,
-                        BluetoothAdapter.ERROR
-                    )
-                    when (state) {
-                        BluetoothAdapter.STATE_CONNECTED -> {
-                            Log.d("BluetoothConnection", "Bluetooth connected")
-                            updateBluetoothStatus() // Actualiza el estado al conectar
-                        }
+    private lateinit var enterButton: Button
+    private  var habilitar=2
+    //borrar estas funciones despues son solo de prueba para la copia al no tener la red
 
-                        BluetoothAdapter.STATE_DISCONNECTED -> {
-                            Log.d("BluetoothConnection", "Bluetooth disconnected")
-                            updateBluetoothStatus() // Actualiza el estado al desconectar
-                        }
-                    }
+
+    fun copyAssetToFilesDir(context: Context, assetFileName: String) {
+        try {
+            // Abrir el archivo en assets
+            val inputStream = context.assets.open(assetFileName)
+            val outputFile = File(context.filesDir, assetFileName)
+
+            // Crear el archivo de salida en filesDir
+            FileOutputStream(outputFile).use { outputStream ->
+                val buffer = ByteArray(1024)
+                var length: Int
+
+                // Leer y escribir en bloques de 1024 bytes
+                while (inputStream.read(buffer).also { length = it } > 0) {
+                    outputStream.write(buffer, 0, length)
                 }
             }
-        }
-    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        enterButton = findViewById(R.id.enterButton) // Ahora es accesible en cualquier parte de la actividad
-
-
-        // Configuración de padding con los insets del sistema
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-        mostrarPopupNumeros(this)
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter() // Inicializar BluetoothAdapter
-        updateBluetoothStatus() // Actualizar estado de Bluetooth
-
-        val enterButton: Button = findViewById(R.id.enterButton)
-        enterButton.setOnClickListener {
-            val numeroIngresado = findViewById<TextView>(R.id.localNumberTextView).text.toString()
-                .removePrefix("Local: ").trim()
-            val numero = numeroIngresado.toIntOrNull() // Convertir el número a Int
-            val intent = Intent(this, InstructionsActivity::class.java)
-            intent.putExtra("numero_ingresado", numero) // Enviar el valor a la segunda actividad
-            startActivity(intent) // Navegar a InstructionsActivity
-        }
-
-        // Botón para ingresar el número de local
-        val localButton: Button = findViewById(R.id.localButton)
-        localButton.setOnClickListener {
-            mostrarPopupNumeros(this)
+            inputStream.close()
+            println("Archivo copiado exitosamente a: ${outputFile.absolutePath}")
+        } catch (e: IOException) {
+            e.printStackTrace()
+            println("Error al copiar el archivo: ${e.message}")
         }
     }
 
 
-    override fun onStart() {
-        super.onStart()
-        val filter = IntentFilter().apply {
-            addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-            addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED) // Escuchar cambios de conexión de Bluetooth
-        }
-        registerReceiver(bluetoothReceiver, filter) // Registrar el receptor
-    }
+    // fun funcion de copia para ser borrada
+    // Función que habilita o deshabilita el botón dependiendo del parámetro
 
-    override fun onStop() {
-        super.onStop()
-        unregisterReceiver(bluetoothReceiver) // Desregistrar el receptor
-    }
-
-    // Actualiza el estado de Bluetooth
-    private fun updateBluetoothStatus() {
-        // val enterButton: Button = findViewById(R.id.enterButton)
-        val statusTextView: TextView = findViewById(R.id.statusTextView)
-        Log.d("BluetoothConnection", "Checking Bluetooth connection for device: $deviceName")
-
-        if (checkBluetoothPermissions() ) {
-            // && isBluetoothHeadsetConnected()) {
-            // Para habilitar el botón
-            actualizarBoton(true)
-
-            statusTextView.text = getString(R.string.connected_to_bluetooth, deviceName)
-        } else {
-            // Deshabilitar botón y cambiar color a gris
-            actualizarBoton(false)
-            statusTextView.text = getString(R.string.bluetooth_not_connected, deviceName)
-            requestBluetoothPermissions() // Solicitar permisos de Bluetooth si es necesario
-        }
-    }
-
-
-    // Verifica si un auricular Bluetooth está conectado
-    @SuppressLint("MissingPermission", "WrongConstant")
-    private fun isBluetoothHeadsetConnected(): Boolean {
-        val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        return (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled
-                && mBluetoothAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET) == BluetoothHeadset.STATE_CONNECTED)
-    }
-
-    // Verifica si el dispositivo Bluetooth tiene los permisos adecuados
-    private fun checkBluetoothPermissions(): Boolean {
-        val isBluetoothConnectGranted = ActivityCompat.checkSelfPermission(
-            this,
-            Manifest.permission.BLUETOOTH_CONNECT
-        ) == PackageManager.PERMISSION_GRANTED
-        val isBluetoothScanGranted = ActivityCompat.checkSelfPermission(
-            this,
-            Manifest.permission.BLUETOOTH_SCAN
-        ) == PackageManager.PERMISSION_GRANTED
-        val isLocationGranted = ActivityCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            isBluetoothConnectGranted && isBluetoothScanGranted && isLocationGranted
-        } else {
-            isBluetoothConnectGranted && isLocationGranted
-        }
-    }
-
-    // Solicita los permisos de Bluetooth necesarios
-    private fun requestBluetoothPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.BLUETOOTH_CONNECT,
-                    Manifest.permission.BLUETOOTH_SCAN,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ),
-                requestBluetoothPermissionsCode
-            )
-        } else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.BLUETOOTH, Manifest.permission.ACCESS_FINE_LOCATION),
-                requestBluetoothPermissionsCode
-            )
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == requestBluetoothPermissionsCode) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                updateBluetoothStatus() // Permisos otorgados, actualizar estado
-            } else {
-                val statusTextView: TextView = findViewById(R.id.statusTextView)
-                statusTextView.text =
-                    getString(R.string.bluetooth_permission_denied) // Permisos denegados
-            }
-        }
-    }
 
     private fun fetchAndSaveProductData(
         context: Context,
@@ -362,8 +441,8 @@ class MainActivity : AppCompatActivity() {
                 connection = serviceUrl.openConnection() as HttpURLConnection
 
                 // Configurar el timeout de conexión y lectura (en milisegundos)
-                connection.connectTimeout = 5000 // 5 segundos para conectar
-                connection.readTimeout = 5000 // 5 segundos para leer la respuesta
+                connection.connectTimeout = 10000 // 5 segundos para conectar
+                connection.readTimeout = 10000   // 5 segundos para leer la respuesta
 
                 connection.requestMethod = "GET"
                 connection.setRequestProperty("Authorization", "Bearer $token")
@@ -384,7 +463,7 @@ class MainActivity : AppCompatActivity() {
                     // Usamos un BufferedWriter para escribir el contenido de manera eficiente
                     val fileWriter = BufferedWriter(FileWriter(filePath))
 
-                    // Usamos `use` para asegurar que los flujos se cierren correctamente
+                    // Usamos use para asegurar que los flujos se cierren correctamente
                     reader.use { bufferedReader ->
                         fileWriter.use { writer ->
                             var line: String?
@@ -426,13 +505,6 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
-
-
-
-
-
-
-
     fun mostrarPopupNumeros(context: Context) {
 
         // Función interna para mostrar la confirmación
@@ -454,7 +526,7 @@ class MainActivity : AppCompatActivity() {
                     progressDialog.show()
 
                     // Crear un CountDownLatch para esperar las solicitudes de tokens
-                    val latch = CountDownLatch(2) // Esperar por 2 solicitudes
+                    val latch = CountDownLatch(1) // Esperar por 2 solicitudes
 
                     // Llamar al primer servicio para obtener el primer token
                     val tokenManager = TokenManager()
@@ -523,10 +595,7 @@ class MainActivity : AppCompatActivity() {
                                 // Cuando las solicitudes han finalizado, cerrar el ProgressDialog
                                 Handler(Looper.getMainLooper()).post {
                                     progressDialog.dismiss() // Ocultar el ProgressDialog
-                                    // Habilitar el botón después de la obtención de datos
-                                    if (habilitar==1){
-                                        actualizarBoton(false)}
-                                    else {actualizarBoton(true)}
+
                                 }
                             }
                         } catch (e: InterruptedException) {
@@ -563,8 +632,8 @@ class MainActivity : AppCompatActivity() {
                 // Validar si el campo está vacío, comienza con 0, o no es un número válido
                 if (numeroIngresado.isNotEmpty() && numeroIngresado.toIntOrNull() != null && !numeroIngresado.startsWith("0")) {
                     mostrarConfirmacion(numeroIngresado) // Mostrar cuadro de confirmación
-                    copyAssetToFilesDir(this, "product.json") // Copiar 'product.json' desde assets
-                    copyAssetToFilesDir(this, "info.json") //copiar archivo
+                    //copyAssetToFilesDir(this, "product.json")  // Copiar 'product.json' desde assets
+                    // copyAssetToFilesDir(this, "info.json")     //copiar archivo
                 } else {
                     // Si el número no es válido o comienza con 0, mostrar mensaje de error
                     val errorMessage = when {
@@ -578,13 +647,6 @@ class MainActivity : AppCompatActivity() {
             }
             .setCancelable(false) // Evita que el usuario cierre el cuadro de diálogo tocando fuera de él
             .create()
-
         dialog.show()
     }
-
-
-
-
-
-
 }

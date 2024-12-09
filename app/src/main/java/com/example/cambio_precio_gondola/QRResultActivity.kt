@@ -31,6 +31,8 @@ import java.io.IOException
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import com.example.cambio_precio_gondola.MainActivity.BluetoothManager.macAddress
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -48,7 +50,9 @@ class QRResultActivity : AppCompatActivity() {
         val fecImpresion: TextView = findViewById(R.id.fecImpresion)
         // Obtener la fecha y hora actual
         val currentDateTime = getCurrentDateTime()
+        val macAddress = MainActivity.BluetoothManager.macAddress
         // Obtener datos del intent
+        fecImpresion.text = "Fecha de impresión: $currentDateTime"
         val resolucion = intent.getStringExtra("resolucion")?.replace("|", " ") ?: "No disponible"
         val nombreProd = intent.getStringExtra("nombre_prod")
         val itemNbr = intent.getStringExtra("item_nbr")
@@ -104,7 +108,7 @@ class QRResultActivity : AppCompatActivity() {
         // Convertir el texto del código de barras a imagen, rotarlo y escalarlo
         val barcodeBitmap = textToBitmap(barcodeText, typeface, textSize = 1000f)?.let { originalBitmap ->
             val rotatedBitmap = rotateBitmap(originalBitmap, 90f) // Rotar 90 grados
-            scaleBitmap(rotatedBitmap, rotatedBitmap.width, 2000) // Escalar a 800 px de altura
+            scaleBitmap(rotatedBitmap, rotatedBitmap.width, 5000) // Escalar a 800 px de altura
 
         }
 
@@ -124,7 +128,7 @@ class QRResultActivity : AppCompatActivity() {
         // Configurar botón para capturar el layout y enviar a imprimir
         val captureButton = findViewById<Button>(R.id.buttonPrint)
         captureButton.setOnClickListener {
-            val layoutEtiquetaFinal = findViewById<LinearLayout>(R.id.layoutEtiquetaFinal)
+            val layoutEtiquetaFinal = findViewById<ConstraintLayout>(R.id.layoutEtiquetaFinal)
             val bitmap = captureLayoutAsBitmap(layoutEtiquetaFinal)
             val zplConverter = ZPLConverter()
             val zplCode = zplConverter.convertFromImage(bitmap, addHeaderFooter = true)
@@ -141,17 +145,12 @@ class QRResultActivity : AppCompatActivity() {
     }
 
 
-
-
-
-
-
-
-
     private fun getCurrentDateTime(): String {
-        val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
         return dateFormat.format(Date())
     }
+
+
     // Función para capturar un layout como Bitmap
     fun captureLayoutAsBitmap(view: View): Bitmap {
         // Definir el tamaño exacto de la etiqueta en píxeles
@@ -164,7 +163,7 @@ class QRResultActivity : AppCompatActivity() {
 
         // Dibujar fondo blanco
         canvas.drawColor(Color.WHITE)
-        val marginTop = 0f
+        val marginTop = 100f
 
         // Escalar el layout al tamaño del Bitmapx|x
         val scaleX = widthPx / view.width.toFloat()
@@ -254,7 +253,7 @@ class QRResultActivity : AppCompatActivity() {
         Thread {
             try {
                 // Conexión Bluetooth
-                val connection = BluetoothConnection("AC:3F:A4:B8:DE:A1") // Dirección MAC de la impresora
+                val connection = BluetoothConnection(macAddress) // Dirección MAC de la impresora
                 connection.open()
 
                 // Obtener la impresora Zebra

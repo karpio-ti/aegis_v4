@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -22,10 +24,7 @@
         android:theme="@style/Theme.Cambio_precio_gondola"
         tools:targetApi="31">
 
-        <!-- Main Activity without intent-filter -->
-
-
-        <!-- Instructions Activity -->
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait"
@@ -35,22 +34,26 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
 
+        <!-- Instructions Activity set as main entry point -->
+        <activity
             android:name=".InstructionsActivity"
-            android:exported="true" />
-
-
-
-        <activity android:name=".InstructionsActivity$QrCodeScannerActivity" />
-
-        <!-- ProdDetailActivity set as main entry point -->
-        <activity
-            android:name=".ProdDetailActivity"
             android:exported="true">
 
         </activity>
 
+        <!-- QrCodeScannerActivity -->
+        <activity
+            android:name=".InstructionsActivity$QrCodeScannerActivity"
+            android:exported="true" />
+
+        <!-- ProdDetailActivity -->
+        <activity
+            android:name=".ProdDetailActivity"
+            android:exported="true">
+        </activity>
+
+        <!-- QRResultActivity -->
         <activity
             android:name=".QRResultActivity"
             android:exported="true" />
