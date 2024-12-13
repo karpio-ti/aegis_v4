@@ -304,7 +304,7 @@ class MainActivity : AppCompatActivity() {
                     )
                 )
             } else {
-                enterButton.isEnabled = true
+                enterButton.isEnabled = false
                 enterButton.setBackgroundColor(Color.LTGRAY)
                 enterButton.setTextColor(Color.GRAY)
             }
